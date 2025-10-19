@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重置问卷数据</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #c0392b;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>重置衬衫选择问卷数据</h1>
+    
+    <div class="warning">
+        <strong>警告：</strong>此操作将清除所有用户的选择数据，包括统计信息和每个人的提交记录。此操作不可撤销！
+    </div>
+    
+    <div>
+        <label>
+            <input type="checkbox" id="confirmReset"> 我理解此操作的风险并确认要重置所有数据
+        </label>
+    </div>
+    
+    <div style="margin: 20px 0;">
+        <label for="adminPassword">管理员密码：</label>
+        <input type="password" id="adminPassword" placeholder="请输入管理员密码">
+    </div>
+    
+    <div>
+        <button onclick="resetData()">重置所有数据</button>
+        <button onclick="viewCurrentData()" style="background: #3498db;">查看当前数据</button>
+    </div>
+    
+    <div id="result" class="success"></div>
+    
+    <div id="dataPreview" style="margin-top: 20px; display: none;">
+        <h3>当前数据预览</h3>
+        <pre id="dataContent"></pre>
+    </div>
+
+    <script>
+        function resetData() {
+            const confirmCheckbox = document.getElementById('confirmReset');
+            const password = document.getElementById('adminPassword').value;
+            
+            if (!confirmCheckbox.checked) {
+                alert('请先确认您了解重置操作的风险');
+                return;
+            }
+            
+            if (password !== 'admin123') { // 替换为您的密码
+                alert('管理员密码错误！');
+                return;
+            }
+            
+            if (!confirm('最终确认：您确定要重置所有问卷数据吗？')) {
+                return;
+            }
+            
+            // 获取重置前的数据统计
+            const submissions = JSON.parse(localStorage.getItem('shirtSubmissions') || '[]');
+            let userStates = 0;
+            
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('shirtSelection')) {
+                    userStates++;
+                }
+            });
+            
+            // 执行重置
+            localStorage.removeItem('shirtSubmissions');
+            
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('shirtSelection')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            // 显示结果
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <strong>重置成功！</strong><br>
+                已删除 ${submissions.length} 条提交记录<br>
+                已清除 ${userStates} 个用户状态
+            `;
+            resultDiv.style.display = 'block';
+            
+            // 隐藏数据预览
+            document.getElementById('dataPreview').style.display = 'none';
+        }
+        
+        function viewCurrentData() {
+            const submissions = JSON.parse(localStorage.getItem('shirtSubmissions') || '[]');
+            const dataContent = document.getElementById('dataContent');
+            const dataPreview = document.getElementById('dataPreview');
+            
+            if (submissions.length === 0) {
+                dataContent.textContent = '暂无数据';
+            } else {
+                dataContent.textContent = JSON.stringify(submissions, null, 2);
+            }
+            
+            dataPreview.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
