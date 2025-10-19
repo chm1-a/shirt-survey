@@ -245,19 +245,40 @@
     <p class="instructions">请确保网络连接正常，以便成功提交您的选择</p>
 
     <script>
-        // 衬衫数据
+        // 衬衫数据 - 使用相对于根目录的路径
         const shirts = [
-            { id: 1, name: "衬衫1", img: "1.jpg" },
-            { id: 2, name: "衬衫2", img: "2.jpg" },
-            { id: 3, name: "衬衫3", img: "3.jpg" },
-            { id: 4, name: "衬衫4", img: "4.jpg" },
-            { id: 5, name: "衬衫5", img: "5.jpg" },
-            { id: 6, name: "衬衫6", img: "6.jpg" },
-            { id: 7, name: "衬衫7", img: "7.jpg" },
-            { id: 8, name: "衬衫8", img: "8.jpg" },
-            { id: 9, name: "衬衫9", img: "9.jpg" },
-            { id: 10, name: "衬衫10", img: "10.jpg" }
+            { id: 1, name: "衬衫1", img: "/shirt-survey/images/1.jpg" },
+            { id: 2, name: "衬衫2", img: "/shirt-survey/images/2.jpg" },
+            { id: 3, name: "衬衫3", img: "/shirt-survey/images/3.jpg" },
+            { id: 4, name: "衬衫4", img: "/shirt-survey/images/4.jpg" },
+            { id: 5, name: "衬衫5", img: "/shirt-survey/images/5.jpg" },
+            { id: 6, name: "衬衫6", img: "/shirt-survey/images/6.jpg" },
+            { id: 7, name: "衬衫7", img: "/shirt-survey/images/7.jpg" },
+            { id: 8, name: "衬衫8", img: "/shirt-survey/images/8.jpg" },
+            { id: 9, name: "衬衫9", img: "/shirt-survey/images/9.jpg" },
+            { id: 10, name: "衬衫10", img: "/shirt-survey/images/10.jpg" }
         ];
+
+        // 图片加载错误处理
+        function handleImageError(imgElement, shirtId) {
+            console.log(`图片加载失败: 衬衫${shirtId}`);
+            
+            // 创建彩色占位符
+            const colors = [
+                "#3498db", "#2ecc71", "#e74c3c", "#f39c12", "#9b59b6",
+                "#1abc9c", "#d35400", "#c0392b", "#16a085", "#8e44ad"
+            ];
+            const color = colors[shirtId-1] || "#95a5a6";
+            
+            // 创建SVG占位图
+            const svg = `
+                <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100%" height="100%" fill="${color}"/>
+                    <text x="50%" y="50%" font-family="Arial" font-size="18" fill="white" text-anchor="middle" dy=".3em">衬衫${shirtId}</text>
+                </svg>
+            `;
+            imgElement.src = 'data:image/svg+xml;base64,' + btoa(svg);
+        }
 
         // 初始化变量
         let selectedShirt = null;
@@ -295,7 +316,7 @@
             const shirt = shirts.find(s => s.id === data.shirtId);
             selectedShirtInfo.innerHTML = `
                 <h3>${shirt.name}</h3>
-                <img src="${shirt.img}" alt="${shirt.name}" class="result-img">
+                <img src="${shirt.img}" alt="${shirt.name}" class="result-img" onerror="handleImageError(this, ${shirt.id})">
                 <p>选择人: ${data.userName}</p>
                 <p>选择时间: ${new Date(data.timestamp).toLocaleString()}</p>
             `;
@@ -312,7 +333,7 @@
                 shirtElement.dataset.id = shirt.id;
                 
                 shirtElement.innerHTML = `
-                    <img src="${shirt.img}" alt="${shirt.name}" class="shirt-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7lm77niYc8L3RleHQ+PC9zdmc+'">
+                    <img src="${shirt.img}" alt="${shirt.name}" class="shirt-image" onerror="handleImageError(this, ${shirt.id})">
                     <div class="shirt-name">${shirt.name}</div>
                 `;
                 
