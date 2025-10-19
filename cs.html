@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>衬衫选择问卷</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px 15px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 25px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .user-input {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .shirt-options {
+            padding: 20px;
+        }
+        
+        .shirt-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .shirt-option {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .shirt-option.selected {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .shirt-option.disabled {
+            opacity: 0.6;
+        }
+        
+        .shirt-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .shirt-name {
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            background: #f8f9fa;
+        }
+        
+        .action-buttons {
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn {
+            background: #2ecc71;
+            color: white;
+        }
+        
+        .submit-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .reset-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .result {
+            padding: 30px 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .result-img {
+            max-width: 250px;
+            border-radius: 8px;
+            margin: 20px auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 0.85rem;
+            padding: 0 10px;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .stats-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>请选择您心仪的衬衫</h1>
+            <p class="subtitle">每人只能选择一件，选择后不可更改</p>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            您已成功提交选择！感谢您的参与。
+        </div>
+        
+        <div class="user-input">
+            <div class="input-group">
+                <label for="userName">您的姓名/昵称：</label>
+                <input type="text" id="userName" placeholder="请输入您的姓名或昵称">
+                <div class="error-message" id="nameError">请输入您的姓名或昵称</div>
+            </div>
+        </div>
+        
+        <div class="shirt-options">
+            <div class="shirt-grid" id="shirtGrid">
+                <!-- 衬衫选项将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="reset-btn" id="resetBtn">重新选择</button>
+            <button class="submit-btn" id="submitBtn" disabled>提交选择</button>
+        </div>
+        
+        <div class="result" id="result">
+            <h2>您已选择</h2>
+            <div id="selectedShirtInfo"></div>
+        </div>
+        
+        <a href="stats.html" class="stats-link">查看统计结果</a>
+    </div>
+    
+    <p class="instructions">请确保网络连接正常，以便成功提交您的选择</p>
+
+    <script>
+        // 衬衫数据
+        const shirts = [
+            { id: 1, name: "衬衫1", img: "1.jpg" },
+            { id: 2, name: "衬衫2", img: "2.jpg" },
+            { id: 3, name: "衬衫3", img: "3.jpg" },
+            { id: 4, name: "衬衫4", img: "4.jpg" },
+            { id: 5, name: "衬衫5", img: "5.jpg" },
+            { id: 6, name: "衬衫6", img: "6.jpg" },
+            { id: 7, name: "衬衫7", img: "7.jpg" },
+            { id: 8, name: "衬衫8", img: "8.jpg" },
+            { id: 9, name: "衬衫9", img: "9.jpg" },
+            { id: 10, name: "衬衫10", img: "10.jpg" }
+        ];
+
+        // 初始化变量
+        let selectedShirt = null;
+        const shirtGrid = document.getElementById('shirtGrid');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const result = document.getElementById('result');
+        const selectedShirtInfo = document.getElementById('selectedShirtInfo');
+        const userNameInput = document.getElementById('userName');
+        const nameError = document.getElementById('nameError');
+        const successMessage = document.getElementById('successMessage');
+
+        // 检查是否已经提交过
+        function checkIfSubmitted() {
+            const submitted = localStorage.getItem('shirtSelectionSubmitted');
+            if (submitted) {
+                const submissionData = JSON.parse(submitted);
+                showSuccessMessage();
+                showSelectionResult(submissionData);
+                return true;
+            }
+            return false;
+        }
+
+        // 显示成功消息
+        function showSuccessMessage() {
+            successMessage.style.display = 'block';
+            document.querySelector('.user-input').style.display = 'none';
+            document.querySelector('.shirt-options').style.display = 'none';
+            document.querySelector('.action-buttons').style.display = 'none';
+        }
+
+        // 显示选择结果
+        function showSelectionResult(data) {
+            const shirt = shirts.find(s => s.id === data.shirtId);
+            selectedShirtInfo.innerHTML = `
+                <h3>${shirt.name}</h3>
+                <img src="${shirt.img}" alt="${shirt.name}" class="result-img">
+                <p>选择人: ${data.userName}</p>
+                <p>选择时间: ${new Date(data.timestamp).toLocaleString()}</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        // 生成衬衫选项
+        function renderShirtOptions() {
+            shirtGrid.innerHTML = '';
+            
+            shirts.forEach(shirt => {
+                const shirtElement = document.createElement('div');
+                shirtElement.className = 'shirt-option';
+                shirtElement.dataset.id = shirt.id;
+                
+                shirtElement.innerHTML = `
+                    <img src="${shirt.img}" alt="${shirt.name}" class="shirt-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7lm77niYc8L3RleHQ+PC9zdmc+'">
+                    <div class="shirt-name">${shirt.name}</div>
+                `;
+                
+                shirtElement.addEventListener('click', () => selectShirt(shirt.id));
+                shirtGrid.appendChild(shirtElement);
+            });
+        }
+
+        // 选择衬衫
+        function selectShirt(shirtId) {
+            // 验证用户名
+            if (!userNameInput.value.trim()) {
+                nameError.style.display = 'block';
+                return;
+            } else {
+                nameError.style.display = 'none';
+            }
+            
+            // 如果已经选择了衬衫，先重置
+            if (selectedShirt) {
+                resetSelection();
+            }
+            
+            // 设置选中的衬衫
+            selectedShirt = shirts.find(shirt => shirt.id === shirtId);
+            
+            // 更新UI
+            const selectedOption = document.querySelector(`.shirt-option[data-id="${shirtId}"]`);
+            selectedOption.classList.add('selected');
+            
+            // 禁用其他选项
+            document.querySelectorAll('.shirt-option:not(.selected)').forEach(option => {
+                option.classList.add('disabled');
+            });
+            
+            // 启用提交按钮
+            submitBtn.disabled = false;
+        }
+
+        // 重置选择
+        function resetSelection() {
+            selectedShirt = null;
+            
+            // 重置所有选项
+            document.querySelectorAll('.shirt-option').forEach(option => {
+                option.classList.remove('selected', 'disabled');
+            });
+            
+            // 禁用提交按钮
+            submitBtn.disabled = true;
+        }
+
+        // 提交选择
+        function submitSelection() {
+            if (!selectedShirt || !userNameInput.value.trim()) {
+                return;
+            }
+            
+            // 准备提交数据
+            const submissionData = {
+                userName: userNameInput.value.trim(),
+                shirtId: selectedShirt.id,
+                shirtName: selectedShirt.name,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            };
+            
+            // 发送数据到服务器（这里使用模拟发送）
+            sendDataToServer(submissionData);
+            
+            // 保存到本地存储，防止重复提交
+            localStorage.setItem('shirtSelectionSubmitted', JSON.stringify(submissionData));
+            
+            // 显示成功消息和结果
+            showSuccessMessage();
+            showSelectionResult(submissionData);
+        }
+
+        // 发送数据到服务器（模拟）
+        function sendDataToServer(data) {
+            // 在实际应用中，这里应该发送到真实的服务器
+            // 这里我们使用localStorage模拟数据存储
+            
+            // 获取现有数据
+            let allSubmissions = JSON.parse(localStorage.getItem('shirtSubmissions') || '[]');
+            
+            // 添加新数据
+            allSubmissions.push(data);
+            
+            // 保存回localStorage
+            localStorage.setItem('shirtSubmissions', JSON.stringify(allSubmissions));
+            
+            console.log('数据已保存:', data);
+        }
+
+        // 事件监听
+        submitBtn.addEventListener('click', submitSelection);
+        resetBtn.addEventListener('click', resetSelection);
+        
+        // 用户名输入验证
+        userNameInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                nameError.style.display = 'none';
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderShirtOptions();
+            
+            // 检查是否已经提交过
+            if (checkIfSubmitted()) {
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

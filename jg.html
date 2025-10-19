@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>衬衫选择统计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px 15px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 25px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .stats-content {
+            padding: 20px;
+        }
+        
+        .stat-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3498db;
+        }
+        
+        .shirt-stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .shirt-stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+        
+        .export-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>衬衫选择统计</h1>
+            <p class="subtitle">实时统计所有人的选择情况</p>
+        </div>
+        
+        <div class="stats-content" id="statsContent">
+            <!-- 统计内容将通过JavaScript动态生成 -->
+        </div>
+        
+        <a href="index.html" class="back-link">返回选择页面</a>
+    </div>
+
+    <script>
+        // 衬衫数据
+        const shirts = [
+            { id: 1, name: "衬衫1", img: "1.jpg" },
+            { id: 2, name: "衬衫2", img: "2.jpg" },
+            { id: 3, name: "衬衫3", img: "3.jpg" },
+            { id: 4, name: "衬衫4", img: "4.jpg" },
+            { id: 5, name: "衬衫5", img: "5.jpg" },
+            { id: 6, name: "衬衫6", img: "6.jpg" },
+            { id: 7, name: "衬衫7", img: "7.jpg" },
+            { id: 8, name: "衬衫8", img: "8.jpg" },
+            { id: 9, name: "衬衫9", img: "9.jpg" },
+            { id: 10, name: "衬衫10", img: "10.jpg" }
+        ];
+
+        // 生成统计信息
+        function generateStats() {
+            const statsContent = document.getElementById('statsContent');
+            
+            // 获取所有提交数据
+            const allSubmissions = JSON.parse(localStorage.getItem('shirtSubmissions') || '[]');
+            
+            if (allSubmissions.length === 0) {
+                statsContent.innerHTML = '<div class="no-data">暂无提交数据</div>';
+                return;
+            }
+            
+            // 计算统计信息
+            const totalSubmissions = allSubmissions.length;
+            
+            // 按衬衫统计
+            const shirtCounts = {};
+            shirts.forEach(shirt => {
+                shirtCounts[shirt.id] = 0;
+            });
+            
+            allSubmissions.forEach(submission => {
+                shirtCounts[submission.shirtId]++;
+            });
+            
+            // 生成HTML
+            let html = `
+                <div class="stat-item">
+                    <div class="stat-title">总参与人数</div>
+                    <div class="stat-value">${totalSubmissions} 人</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-title">各衬衫选择情况</div>
+                    <div class="shirt-stats">
+            `;
+            
+            shirts.forEach(shirt => {
+                const count = shirtCounts[shirt.id];
+                const percentage = totalSubmissions > 0 ? ((count / totalSubmissions) * 100).toFixed(1) : 0;
+                
+                html += `
+                    <div class="shirt-stat-item">
+                        <span>${shirt.name}</span>
+                        <span>${count} 人 (${percentage}%)</span>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-title">详细选择记录</div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+            `;
+            
+            allSubmissions.forEach(submission => {
+                const date = new Date(submission.timestamp).toLocaleString();
+                html += `
+                    <div style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">
+                        <div><strong>${submission.userName}</strong> 选择了 <strong>${submission.shirtName}</strong></div>
+                        <div style="font-size: 0.8rem; color: #6c757d;">${date}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+                
+                <button class="export-btn" id="exportBtn">导出数据</button>
+            `;
+            
+            statsContent.innerHTML = html;
+            
+            // 添加导出按钮事件
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+        }
+        
+        // 导出数据
+        function exportData() {
+            const allSubmissions = JSON.parse(localStorage.getItem('shirtSubmissions') || '[]');
+            
+            if (allSubmissions.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+            
+            // 转换为CSV格式
+            let csv = '姓名,选择的衬衫,选择时间\n';
+            
+            allSubmissions.forEach(submission => {
+                const date = new Date(submission.timestamp).toLocaleString();
+                csv += `"${submission.userName}","${submission.shirtName}","${date}"\n`;
+            });
+            
+            // 创建下载链接
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', '衬衫选择统计.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', generateStats);
+    </script>
+</body>
+</html>
